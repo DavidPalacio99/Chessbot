@@ -12,7 +12,7 @@ const BottomBar = () => {
       </a>
       <h3 className=" mx-3 font-bold">Developed by David Palacio</h3>
       <a
-        href="https://github.com/DavidPalacio99/Chess"
+        href="https://github.com/DavidPalacio99/Chessbot"
         target={"_blanck"}
         // className="border"
       >

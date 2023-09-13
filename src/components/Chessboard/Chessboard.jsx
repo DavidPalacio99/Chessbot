@@ -21,19 +21,18 @@ import { Chessboard as Board } from "react-chessboard";
 import { useEffect, useState, useMemo } from "react";
 import light from "../../assets/light.jpg";
 import green from "../../assets/green.jpg";
-
-// IMPORTS JUEGO
-
 import { Chess } from "chess.js";
 import useSound from "use-sound";
 import Engine from "../../engine";
 import { toast } from "react-hot-toast";
 
-// FINAL IMPORTS JUEGO
-
 const Chessboard = () => {
+  // ESTADOS
+
   const [width, setWidth] = useState(0);
   const [heigth, setHeight] = useState(0);
+
+  // CONSTANTES JUEGO
 
   const levels = {
     "Easy 🤓": 2,
@@ -41,8 +40,6 @@ const Chessboard = () => {
     "Hard 😵": 16,
   };
   const { onClose, isOpen, onOpen } = useDisclosure();
-
-  // CONSTANTES JUEGO
   const [game, setGame] = useState(new Chess());
   const [isCPU, setIsCPU] = useState(true);
   const [nextToMove, setNextToMove] = useState("w");
@@ -55,15 +52,12 @@ const Chessboard = () => {
   const [moveSquares, setMoveSquares] = useState({});
   const [optionSquares, setOptionSquares] = useState({});
   const [stockfishLevel, setStockfishLevel] = useState(2);
-  const [modal, setModal] = useState(false);
   const [play] = useSound("/sounds/move.mp3");
   const [capture] = useSound("/sounds/capture.mp3");
   const [notify] = useSound("/sounds/notify.mp3");
   const [style, setStyle] = useState("green");
 
-  // FINAL CONSTANTES JUEGO
-
-  // FUNCIONES JUEGO
+  // EFECTOS
 
   useEffect(() => {
     if (game.game_over()) {
@@ -73,17 +67,26 @@ const Chessboard = () => {
     setHistory(game.history());
   }, [game, onOpen]);
 
+  useEffect(() => {
+    setHeight(window.innerHeight);
+    setWidth(window.innerWidth);
+
+    window.addEventListener(
+      "resize",
+      () => {
+        setWidth(window.innerWidth);
+        setHeight(window.innerHeight);
+      },
+      true
+    );
+  }, []);
+
+  // FUNCIONES JUEGO
+
   function findBestMove() {
     console.log("corriendo funcion");
     if (!isCPU) return;
     console.log("corriendo funcion 2");
-
-    // const loadingId =
-    //   stockfishLevel === 16
-    //     ? toast.loading("StockFish is thinking", {
-    //         position: "top-right",
-    //       })
-    //     : null;
 
     if (stockfishLevel === 16) {
       toast.loading("StockFish is thinking", {
@@ -97,11 +100,6 @@ const Chessboard = () => {
       if (stockfishLevel === 16) {
         console.log("entering");
         toast.dismiss();
-        // toast.success("StockFish played, it's your turn now!", {
-        //   id: loadingId,
-        //   position: "top-right",
-        //   duration: 3500,
-        // })
       }
 
       if (bestMove) {
@@ -172,16 +170,13 @@ const Chessboard = () => {
     setRightClickedSquares({});
     console.log("running");
 
-    // from square
     if (!moveFrom) {
       const hasMoveOptions = getMoveOptions(square);
       if (hasMoveOptions) setMoveFrom(square);
       return;
     }
 
-    // to square
     if (!moveTo) {
-      // check if valid move before showing dialog
       const moves = game.moves({
         moveFrom,
         verbose: true,
@@ -189,19 +184,13 @@ const Chessboard = () => {
       const foundMove = moves.find(
         (m) => m.from === moveFrom && m.to === square
       );
-      // not a valid move
       if (!foundMove) {
-        // check if clicked on new piece
         const hasMoveOptions = getMoveOptions(square);
-        // if new piece, setMoveFrom, otherwise clear moveFrom
         setMoveFrom(hasMoveOptions ? square : "");
         return;
       }
-
-      // valid move
       setMoveTo(square);
 
-      // if promotion move
       if (
         (foundMove.color === "w" &&
           foundMove.piece === "p" &&
@@ -214,7 +203,6 @@ const Chessboard = () => {
         return;
       }
 
-      // is normal move
       const gameCopy = { ...game };
       const move = gameCopy.move({
         from: moveFrom,
@@ -228,7 +216,6 @@ const Chessboard = () => {
         play();
       }
 
-      // if invalid, setMoveFrom and getMoveOptions
       if (move === null) {
         const hasMoveOptions = getMoveOptions(square);
         if (hasMoveOptions) setMoveFrom(square);
@@ -247,7 +234,6 @@ const Chessboard = () => {
   }
 
   function onPromotionPieceSelect(piece) {
-    // if no piece passed then user has cancelled dialog, don't make move and reset
     if (piece) {
       const gameCopy = { ...game };
       gameCopy.move({
@@ -310,22 +296,6 @@ const Chessboard = () => {
     setRightClickedSquares({});
   };
 
-  // FINAL FUNCIONES JUEGO
-
-  useEffect(() => {
-    setHeight(window.innerHeight);
-    setWidth(window.innerWidth);
-
-    window.addEventListener(
-      "resize",
-      () => {
-        setWidth(window.innerWidth);
-        setHeight(window.innerHeight);
-      },
-      true
-    );
-  }, []);
-
   // RENDER
 
   return (
@@ -339,9 +309,6 @@ const Chessboard = () => {
               </h3>
             </CardBody>
           </Card>
-          {/* <Chip className="mb-5" color="primary">
-            {isCPU ? "White" : nextToMove === "w" ? "White" : "Black"} moves
-          </Chip> */}
           <div className="mb-5 hover:cursor-pointer">
             <Board
               id="ClickToMove"
